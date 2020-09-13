@@ -1,0 +1,40 @@
+%matplotlib inline
+
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from io import BytesIO
+from datetime import datetime
+
+
+
+dta = pd.read_excel(r'C:\Users\likeb\Documents\Columbia Documents\Spring 2020\Multi-asset Portfolio Management\Final Project\Final_Project.xlsx', 
+                    sheet_name = "turbulence(t)")
+#print(dta)
+dta.index = pd.DatetimeIndex(dta.Date, freq="m")
+dta_regime = dta.Turbulence
+#dta_regime.plot(title='Turbulence', figsize=(12,3))
+
+# Fit the model
+regime_model = sm.tsa.MarkovRegression(dta_regime, k_regimes=2, switching_variance=True)
+#regime_model = sm.tsa.MarkovAutoregression(dta_regime, k_regimes=2, order = 2, trend = 'nc', switching_variance=True)
+res_regime = regime_model.fit()
+
+res_regime.summary()
+
+res_regime.smoothed_marginal_probabilities[1].plot(
+    title='Probability of being in the high regime', figsize=(12,3));
+
+
+
+pd.options.display.max_rows = 4000
+print(res_regime.smoothed_marginal_probabilities[1])
+
+
+
+res_regime.summary()
+
+
+res_regime.smoothed_marginal_probabilities[1].to_excel(r'C:\Users\likeb\Documents\Columbia Documents\Spring 2020\Multi-asset Portfolio Management\Final Project\Final_Project.xlsx', 
+                    sheet_name = "2-state Markov Regression")
